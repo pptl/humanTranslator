@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(npx electron-vite *)",
+      "Bash(npm run *)",
+      "Bash(node node_modules/electron/install.js)",
+      "Bash(node -e \"const { execSync } = require\\('child_process'\\); try { execSync\\('node node_modules/electron/install.js', {stdio: 'inherit', timeout: 90000}\\); } catch\\(e\\) { console.error\\(e.message\\); }\")"
+    ]
+  }
+}
