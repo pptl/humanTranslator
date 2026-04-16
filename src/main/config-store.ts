@@ -4,8 +4,7 @@ import { join } from 'path'
 import type { AppConfig } from '../shared/types'
 
 const DEFAULT_CONFIG: AppConfig = {
-  claudeApiKey: '',
-  openaiApiKey: '',
+  apiKey: '',
   selectedProvider: 'claude',
   windowPosition: { x: -1, y: -1 }
 }

@@ -127,11 +127,10 @@ export async function callLLM(
   context: string,
   config: AppConfig
 ): Promise<FeedbackResult> {
+  if (!config.apiKey) throw new Error('尚未設定 API Key')
   if (config.selectedProvider === 'claude') {
-    if (!config.claudeApiKey) throw new Error('尚未設定 Claude API Key')
-    return callClaude(chineseText, userTranslation, context, config.claudeApiKey)
+    return callClaude(chineseText, userTranslation, context, config.apiKey)
   } else {
-    if (!config.openaiApiKey) throw new Error('尚未設定 OpenAI API Key')
-    return callOpenAI(chineseText, userTranslation, context, config.openaiApiKey)
+    return callOpenAI(chineseText, userTranslation, context, config.apiKey)
   }
 }

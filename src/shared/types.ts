@@ -1,6 +1,5 @@
 export interface AppConfig {
-  claudeApiKey: string
-  openaiApiKey: string
+  apiKey: string
   selectedProvider: 'claude' | 'openai'
   windowPosition: { x: number; y: number }
 }

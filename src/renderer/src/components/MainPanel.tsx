@@ -13,19 +13,21 @@ export function MainPanel() {
   const [selectedContextId, setSelectedContextId] = useState<string>('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const comboboxRef = useRef<HTMLDivElement>(null)
+  const initializedRef = useRef(false)
 
   const [chineseText, setChineseText] = useState('')
   const [userTranslation, setUserTranslation] = useState('')
   const resultRef = useRef<HTMLDivElement>(null)
 
-  // Default to first context on load
+  // Default to first context on load (run only once)
   useEffect(() => {
-    if (contexts.length > 0 && !selectedContextId) {
+    if (contexts.length > 0 && !initializedRef.current) {
+      initializedRef.current = true
       const first = contexts[0]
       setSelectedContextId(first.id)
       setContextInput(first.name)
     }
-  }, [contexts, selectedContextId])
+  }, [contexts])
 
   // Close dropdown on outside click
   useEffect(() => {

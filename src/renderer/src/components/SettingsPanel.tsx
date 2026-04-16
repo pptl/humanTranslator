@@ -6,22 +6,19 @@ export function SettingsPanel() {
   const { config, saveConfig } = useConfig()
   const { contexts, addContext, deleteContext } = useContexts()
 
-  const [claudeKey, setClaudeKey] = useState('')
-  const [openaiKey, setOpenaiKey] = useState('')
+  const [apiKey, setApiKey] = useState('')
   const [provider, setProvider] = useState<'claude' | 'openai'>('claude')
   const [newContextName, setNewContextName] = useState('')
   const [saveStatus, setSaveStatus] = useState<'' | 'saved' | 'error'>('')
 
   useEffect(() => {
-    setClaudeKey(config.claudeApiKey)
-    setOpenaiKey(config.openaiApiKey)
+    setApiKey(config.apiKey)
     setProvider(config.selectedProvider)
   }, [config])
 
   async function handleSave() {
     const success = await saveConfig({
-      claudeApiKey: claudeKey,
-      openaiApiKey: openaiKey,
+      apiKey,
       selectedProvider: provider
     })
     setSaveStatus(success ? 'saved' : 'error')
@@ -52,21 +49,12 @@ export function SettingsPanel() {
           />
         </div>
 
-        <label style={labelStyle}>Claude API Key</label>
+        <label style={labelStyle}>API Key</label>
         <input
           type="password"
-          placeholder="sk-ant-..."
-          value={claudeKey}
-          onChange={(e) => setClaudeKey(e.target.value)}
-          style={{ ...inputStyle, marginBottom: '10px' }}
-        />
-
-        <label style={labelStyle}>OpenAI API Key</label>
-        <input
-          type="password"
-          placeholder="sk-..."
-          value={openaiKey}
-          onChange={(e) => setOpenaiKey(e.target.value)}
+          placeholder={provider === 'claude' ? 'sk-ant-...' : 'sk-...'}
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
           style={{ ...inputStyle, marginBottom: '12px' }}
         />
 
@@ -147,6 +135,15 @@ export function SettingsPanel() {
           </button>
         </div>
       </section>
+
+      <hr style={{ border: 'none', borderTop: '1px solid var(--color-light-border)' }} />
+
+      <button
+        onClick={() => window.api.quitApp()}
+        style={{ ...buttonStyle, background: '#e53e3e' }}
+      >
+        退出應用程式
+      </button>
     </div>
   )
 }

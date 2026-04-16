@@ -3,6 +3,7 @@ import { FAB } from './components/FAB'
 import { MainPanel } from './components/MainPanel'
 import { ReviewPanel } from './components/ReviewPanel'
 import { SettingsPanel } from './components/SettingsPanel'
+import { ContextsProvider } from './contexts/ContextsProvider'
 import type { AppView } from '../../shared/types'
 
 export default function App() {
@@ -145,7 +146,9 @@ export default function App() {
 
         {/* Content */}
         <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
-          {renderContent()}
+          <ContextsProvider>
+            {renderContent()}
+          </ContextsProvider>
         </div>
       </div>
     </div>

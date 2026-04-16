@@ -1,6 +1,5 @@
 import { BrowserWindow, screen, ipcMain } from 'electron'
 import { join } from 'path'
-import { getConfig, setConfig } from './config-store'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -10,18 +9,20 @@ const EXPANDED_HEIGHT = 560
 
 let win: BrowserWindow | null = null
 let isExpanded = false
-let savedFabPosition: { x: number; y: number } | null = null
+let savedFabPos: { x: number; y: number } | null = null
 
 export function getWindow(): BrowserWindow | null {
   return win
 }
 
 export function createFloatWindow(): BrowserWindow {
-  const config = getConfig()
+  isExpanded = false
+  savedFabPos = null
+
   const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize
 
-  const x = config.windowPosition.x >= 0 ? config.windowPosition.x : sw - FAB_SIZE - 24
-  const y = config.windowPosition.y >= 0 ? config.windowPosition.y : sh - FAB_SIZE - 72
+  const x = sw - FAB_SIZE - 24
+  const y = sh - FAB_SIZE - 72
 
   win = new BrowserWindow({
     width: FAB_SIZE,
@@ -48,12 +49,6 @@ export function createFloatWindow(): BrowserWindow {
     win?.setAlwaysOnTop(true, process.platform === 'darwin' ? 'floating' : 'screen-saver')
   })
 
-  win.on('moved', () => {
-    if (!win || isExpanded) return
-    const [wx, wy] = win.getPosition()
-    setConfig({ windowPosition: { x: wx, y: wy } })
-  })
-
   if (isDev && process.env['ELECTRON_RENDERER_URL']) {
     win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -68,8 +63,7 @@ export function expandWindow(): void {
   isExpanded = true
 
   const [fabX, fabY] = win.getPosition()
-  savedFabPosition = { x: fabX, y: fabY }
-
+  savedFabPos = { x: fabX, y: fabY }
   const { width: sw } = screen.getPrimaryDisplay().workAreaSize
 
   // Expand left if FAB is on the right half of the screen, otherwise expand right
@@ -86,19 +80,22 @@ export function expandWindow(): void {
 export function collapseWindow(): void {
   if (!win) return
 
-  // Restore FAB to where it was before expanding
-  if (savedFabPosition) {
-    win.setSize(FAB_SIZE, FAB_SIZE, false)
-    win.setPosition(savedFabPosition.x, savedFabPosition.y, false)
-    savedFabPosition = null
-  } else {
-    const [curX, curY] = win.getPosition()
-    win.setSize(FAB_SIZE, FAB_SIZE, false)
-    win.setPosition(curX, curY, false)
-  }
+  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize
+  const fabX = savedFabPos?.x ?? sw - FAB_SIZE - 24
+  const fabY = savedFabPos?.y ?? sh - FAB_SIZE - 72
 
+  // Tell React to render the FAB, then hide the window during the transition
+  // so the briefly-clipped expanded panel content never flashes as a square
   isExpanded = false
   win.webContents.send('window:state-changed', { isExpanded: false })
+  win.setOpacity(0)
+
+  setTimeout(() => {
+    if (!win) return
+    win.setBounds({ x: fabX, y: fabY, width: FAB_SIZE, height: FAB_SIZE }, false)
+    win.setAlwaysOnTop(true, process.platform === 'darwin' ? 'floating' : 'screen-saver')
+    win.setOpacity(1)
+  }, 50)
 }
 
 export function setWindowHeight(height: number): void {

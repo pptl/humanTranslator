@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, app } from 'electron'
 import { getConfig, setConfig } from './config-store'
 import { getContexts, addContext, deleteContext } from './context-store'
 import { getRecords, addRecord } from './records-store'
@@ -45,6 +45,11 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('records:add', (_event, data) => {
     return addRecord(data)
+  })
+
+  // App
+  ipcMain.handle('app:quit', () => {
+    app.quit()
   })
 
   // LLM

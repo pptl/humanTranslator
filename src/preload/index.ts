@@ -35,7 +35,10 @@ const api = {
   },
   removeWindowStateListeners: (): void => {
     ipcRenderer.removeAllListeners('window:state-changed')
-  }
+  },
+
+  // App
+  quitApp: (): Promise<void> => ipcRenderer.invoke('app:quit')
 }
 
 contextBridge.exposeInMainWorld('api', api)

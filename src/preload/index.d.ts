@@ -17,6 +17,7 @@ declare global {
       moveWindowBy: (dx: number, dy: number) => void
       onWindowStateChanged: (cb: (data: { isExpanded: boolean }) => void) => void
       removeWindowStateListeners: () => void
+      quitApp: () => Promise<void>
     }
   }
 }
