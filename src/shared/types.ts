@@ -37,6 +37,19 @@ export interface TranslatePayload {
   context: string
 }
 
+export interface FollowUpQA {
+  question: string
+  answer: string
+}
+
+export interface FollowUpPayload {
+  chineseText: string
+  userTranslation: string
+  context: string
+  feedback: FeedbackResult
+  question: string
+}
+
 export interface IpcResult<T> {
   data?: T
   error?: string

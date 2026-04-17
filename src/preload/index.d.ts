@@ -1,4 +1,4 @@
-import type { AppConfig, Context, FeedbackResult, PracticeRecord, TranslatePayload } from '../shared/types'
+import type { AppConfig, Context, FeedbackResult, FollowUpPayload, PracticeRecord, TranslatePayload } from '../shared/types'
 
 declare global {
   interface Window {
@@ -12,6 +12,7 @@ declare global {
       getAllRecords: () => Promise<PracticeRecord[]>
       addRecord: (data: Omit<PracticeRecord, 'id' | 'createdAt'>) => Promise<PracticeRecord>
       translate: (payload: TranslatePayload) => Promise<FeedbackResult | { error: string }>
+      followUp: (payload: FollowUpPayload) => Promise<{ answer: string } | { error: string }>
       toggleWindow: () => Promise<{ isExpanded: boolean }>
       setWindowHeight: (height: number) => Promise<void>
       getWindowState: () => Promise<{ isExpanded: boolean }>

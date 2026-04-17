@@ -2,8 +2,8 @@ import { ipcMain, app } from 'electron'
 import { getConfig, setConfig } from './config-store'
 import { getContexts, addContext, deleteContext, incrementContextUsage, getTopContexts, getContextUsage } from './context-store'
 import { getRecords, addRecord } from './records-store'
-import { callLLM } from './llm-service'
-import type { TranslatePayload } from '../shared/types'
+import { callLLM, callFollowUp } from './llm-service'
+import type { TranslatePayload, FollowUpPayload } from '../shared/types'
 
 export function registerIpcHandlers(): void {
   // Config
@@ -50,6 +50,16 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('records:add', (_event, data) => {
     if (data.context) incrementContextUsage(data.context)
     return addRecord(data)
+  })
+
+  ipcMain.handle('llm:follow-up', async (_event, payload: FollowUpPayload) => {
+    try {
+      const config = getConfig()
+      const answer = await callFollowUp(payload, config)
+      return { answer }
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : '發生未知錯誤，請重試' }
+    }
   })
 
   // App

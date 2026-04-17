@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import OpenAI from 'openai'
-import type { AppConfig, FeedbackResult } from '../shared/types'
+import type { AppConfig, FeedbackResult, FollowUpPayload } from '../shared/types'
 
 function buildSystemPrompt(topContexts: string[]): string {
   const contextEntries = topContexts
@@ -118,6 +118,69 @@ async function callOpenAI(
   if (!content) throw new Error('OpenAI 回應為空')
   const parsed = JSON.parse(extractJson(content))
   return validateFeedback(parsed)
+}
+
+function buildFollowUpSystemPrompt(payload: FollowUpPayload): string {
+  const { chineseText, userTranslation, context, feedback } = payload
+  const versions = feedback.contextVersions.map((v) => `  - ${v.name}：${v.text}`).join('\n')
+  return `你是一位專業的英語教師，正在幫助一位中文母語學習者理解你剛剛給出的翻譯批改回饋。
+
+學生的原始練習資料如下：
+
+【情景】${context}
+【原文（中文）】${chineseText}
+【學生翻譯（英文）】${userTranslation}
+
+【你剛才給出的批改結果】
+- 分數：${feedback.score}/10
+- 評語：${feedback.verdict}
+- 問題說明：${feedback.problem}
+- 更好的說法：${feedback.betterVersion}
+- 語法重點：${feedback.grammarTip}
+- 不同情景版本：
+${versions}
+
+請根據以上脈絡，用繁體中文回答學生的追問。
+回答要具體、針對這次批改，不超過150字，語氣親切。
+不要重複已給出的批改內容，除非學生要求解釋。
+直接回答，不要有任何前置語如「好的」或「當然」。`
+}
+
+async function callClaudeFollowUp(payload: FollowUpPayload, apiKey: string): Promise<string> {
+  const client = new Anthropic({ apiKey })
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 512,
+    system: buildFollowUpSystemPrompt(payload),
+    messages: [{ role: 'user', content: `學生的追問：${payload.question}` }]
+  })
+  const textBlock = response.content.find((b) => b.type === 'text')
+  if (!textBlock || textBlock.type !== 'text') throw new Error('Claude 回應中沒有文字內容')
+  return textBlock.text.trim()
+}
+
+async function callOpenAIFollowUp(payload: FollowUpPayload, apiKey: string): Promise<string> {
+  const client = new OpenAI({ apiKey })
+  const response = await client.chat.completions.create({
+    model: 'gpt-4o-mini',
+    max_tokens: 512,
+    messages: [
+      { role: 'system', content: buildFollowUpSystemPrompt(payload) },
+      { role: 'user', content: `學生的追問：${payload.question}` }
+    ]
+  })
+  const content = response.choices[0]?.message?.content
+  if (!content) throw new Error('OpenAI 回應為空')
+  return content.trim()
+}
+
+export async function callFollowUp(payload: FollowUpPayload, config: AppConfig): Promise<string> {
+  if (!config.apiKey) throw new Error('尚未設定 API Key')
+  if (config.selectedProvider === 'claude') {
+    return callClaudeFollowUp(payload, config.apiKey)
+  } else {
+    return callOpenAIFollowUp(payload, config.apiKey)
+  }
 }
 
 export async function callLLM(

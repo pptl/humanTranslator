@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useContexts } from '../hooks/useContexts'
 import { useTranslate } from '../hooks/useTranslate'
 import { ResultPanel } from './ResultPanel'
+import { FollowUpPanel } from './FollowUpPanel'
 import type { Context } from '../../../shared/types'
 
 export function MainPanel() {
@@ -17,6 +18,7 @@ export function MainPanel() {
 
   const [chineseText, setChineseText] = useState('')
   const [userTranslation, setUserTranslation] = useState('')
+  const [submissionKey, setSubmissionKey] = useState(0)
   const resultRef = useRef<HTMLDivElement>(null)
 
   // Restore last selected context on load (run only once)
@@ -93,6 +95,7 @@ export function MainPanel() {
   async function handleSubmit() {
     const contextName = getContextName()
     if (!contextName || !chineseText.trim() || !userTranslation.trim()) return
+    setSubmissionKey((k) => k + 1)
     await submit(chineseText.trim(), userTranslation.trim(), contextName)
   }
 
@@ -246,6 +249,13 @@ export function MainPanel() {
             }}
           />
           <ResultPanel feedback={feedback} />
+          <FollowUpPanel
+            key={submissionKey}
+            chineseText={chineseText}
+            userTranslation={userTranslation}
+            context={getContextName()}
+            feedback={feedback}
+          />
         </div>
       )}
     </div>

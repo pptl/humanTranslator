@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { AppConfig, Context, FeedbackResult, PracticeRecord, TranslatePayload } from '../shared/types'
+import type { AppConfig, Context, FeedbackResult, FollowUpPayload, PracticeRecord, TranslatePayload } from '../shared/types'
 
 const api = {
   // Config
@@ -23,6 +23,8 @@ const api = {
   // LLM
   translate: (payload: TranslatePayload): Promise<FeedbackResult | { error: string }> =>
     ipcRenderer.invoke('llm:translate', payload),
+  followUp: (payload: FollowUpPayload): Promise<{ answer: string } | { error: string }> =>
+    ipcRenderer.invoke('llm:follow-up', payload),
 
   // Window
   toggleWindow: (): Promise<{ isExpanded: boolean }> => ipcRenderer.invoke('window:toggle'),
