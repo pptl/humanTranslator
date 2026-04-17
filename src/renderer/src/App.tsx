@@ -7,7 +7,7 @@ import { ContextsProvider } from './contexts/ContextsProvider'
 import type { AppView } from '../../shared/types'
 
 export default function App() {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
   const [activeView, setActiveView] = useState<AppView>('main')
 
   useEffect(() => {

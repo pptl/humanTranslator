@@ -16,17 +16,21 @@ export function getWindow(): BrowserWindow | null {
 }
 
 export function createFloatWindow(): BrowserWindow {
-  isExpanded = false
+  isExpanded = true
   savedFabPos = null
 
-  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize
+  const { width: sw } = screen.getPrimaryDisplay().workAreaSize
 
-  const x = sw - FAB_SIZE - 24
-  const y = sh - FAB_SIZE - 72
+  const fabX = sw - FAB_SIZE - 24
+  const fabY = 24
+  savedFabPos = { x: fabX, y: fabY }
+
+  const x = Math.max(0, fabX + FAB_SIZE - EXPANDED_WIDTH)
+  const y = fabY
 
   win = new BrowserWindow({
-    width: FAB_SIZE,
-    height: FAB_SIZE,
+    width: EXPANDED_WIDTH,
+    height: EXPANDED_HEIGHT,
     x,
     y,
     frame: false,

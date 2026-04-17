@@ -123,9 +123,35 @@ export function MainPanel() {
             onChange={(e) => handleContextInputChange(e.target.value)}
             onFocus={() => setIsDropdownOpen(true)}
             placeholder="選擇或輸入情景..."
-            style={inputStyle}
+            style={{ ...inputStyle, paddingRight: contextInput ? '28px' : '10px' }}
             disabled={isLoading}
           />
+          {contextInput && !isLoading && (
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault()
+                handleContextInputChange('')
+                setSelectedContextId('')
+              }}
+              style={{
+                position: 'absolute',
+                right: '6px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '2px',
+                color: 'var(--color-light-border)',
+                fontSize: '14px',
+                lineHeight: 1,
+                WebkitAppRegion: 'no-drag'
+              }}
+              tabIndex={-1}
+            >
+              ✕
+            </button>
+          )}
           {isDropdownOpen && (filteredContexts.length > 0 || canCreateNew) && (
             <div style={dropdownStyle}>
               {filteredContexts.map((c) => (
