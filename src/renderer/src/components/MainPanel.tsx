@@ -19,13 +19,15 @@ export function MainPanel() {
   const [userTranslation, setUserTranslation] = useState('')
   const resultRef = useRef<HTMLDivElement>(null)
 
-  // Default to first context on load (run only once)
+  // Restore last selected context on load (run only once)
   useEffect(() => {
     if (contexts.length > 0 && !initializedRef.current) {
       initializedRef.current = true
-      const first = contexts[0]
-      setSelectedContextId(first.id)
-      setContextInput(first.name)
+      const lastName = localStorage.getItem('lastContext')
+      const match = lastName ? contexts.find((c) => c.name === lastName) : null
+      const target = match ?? contexts[0]
+      setSelectedContextId(target.id)
+      setContextInput(target.name)
     }
   }, [contexts])
 
@@ -69,6 +71,7 @@ export function MainPanel() {
     setContextInput(c.name)
     setSelectedContextId(c.id)
     setIsDropdownOpen(false)
+    localStorage.setItem('lastContext', c.name)
   }
 
   async function handleCreateContext() {
@@ -78,6 +81,7 @@ export function MainPanel() {
     setIsDropdownOpen(false)
     const newCtx = await addContext(name)
     setSelectedContextId(newCtx.id)
+    localStorage.setItem('lastContext', name)
   }
 
   function getContextName(): string {

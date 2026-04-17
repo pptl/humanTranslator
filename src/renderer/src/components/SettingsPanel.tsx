@@ -10,11 +10,16 @@ export function SettingsPanel() {
   const [provider, setProvider] = useState<'claude' | 'openai'>('claude')
   const [newContextName, setNewContextName] = useState('')
   const [saveStatus, setSaveStatus] = useState<'' | 'saved' | 'error'>('')
+  const [contextUsage, setContextUsage] = useState<Record<string, number>>({})
 
   useEffect(() => {
     setApiKey(config.apiKey)
     setProvider(config.selectedProvider)
   }, [config])
+
+  useEffect(() => {
+    window.api.getContextUsage().then(setContextUsage)
+  }, [contexts])
 
   async function handleSave() {
     const success = await saveConfig({
@@ -79,7 +84,7 @@ export function SettingsPanel() {
       <section>
         <SectionTitle>情景管理</SectionTitle>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
-          {contexts.map((c) => (
+          {[...contexts].sort((a, b) => (contextUsage[b.name] ?? 0) - (contextUsage[a.name] ?? 0)).map((c) => (
             <div
               key={c.id}
               style={{
@@ -91,7 +96,12 @@ export function SettingsPanel() {
                 borderRadius: 'var(--border-radius-sm)'
               }}
             >
-              <span style={{ fontSize: '13px', color: 'var(--color-text)' }}>{c.name}</span>
+              <span style={{ fontSize: '13px', color: 'var(--color-text)' }}>
+                {c.name}
+                <span style={{ marginLeft: '6px', fontSize: '11px', color: 'var(--color-text-muted)' }}>
+                  {contextUsage[c.name] ?? 0}
+                </span>
+              </span>
               <button
                 onClick={() => deleteContext(c.id)}
                 style={{

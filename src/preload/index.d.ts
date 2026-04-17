@@ -6,6 +6,7 @@ declare global {
       getConfig: () => Promise<AppConfig>
       saveConfig: (partial: Partial<AppConfig>) => Promise<{ success: boolean; error?: string }>
       getContexts: () => Promise<Context[]>
+      getContextUsage: () => Promise<Record<string, number>>
       addContext: (name: string) => Promise<Context>
       deleteContext: (id: string) => Promise<{ success: boolean }>
       getAllRecords: () => Promise<PracticeRecord[]>

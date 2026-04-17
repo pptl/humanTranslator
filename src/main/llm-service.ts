@@ -2,7 +2,11 @@ import Anthropic from '@anthropic-ai/sdk'
 import OpenAI from 'openai'
 import type { AppConfig, FeedbackResult } from '../shared/types'
 
-const SYSTEM_PROMPT = `你是一位專業的英語教師，專門幫助母語為中文的學習者改善英語書寫能力。
+function buildSystemPrompt(topContexts: string[]): string {
+  const contextEntries = topContexts
+    .map((name) => `    {"name": "${name}", "text": "<針對${name}情景的英文版本>"}`)
+    .join(',\n')
+  return `你是一位專業的英語教師，專門幫助母語為中文的學習者改善英語書寫能力。
 
 你的任務是評估學生的英文翻譯，並提供結構化的回饋。
 
@@ -13,11 +17,9 @@ const SYSTEM_PROMPT = `你是一位專業的英語教師，專門幫助母語為
   "verdict": "<一句話評語，繁體中文，不超過20字>",
   "problem": "<解釋學生版本的具體問題，繁體中文，2-4句>",
   "betterVersion": "<最自然的英文版本>",
-  "contextVersions": {
-    "formal": "<正式場合的英文版本>",
-    "casual": "<朋友對話的英文版本>",
-    "written": "<書面寫作的英文版本>"
-  },
+  "contextVersions": [
+${contextEntries}
+  ],
   "grammarTip": "<相關語法重點，繁體中文，1-2句>"
 }
 
@@ -28,7 +30,8 @@ const SYSTEM_PROMPT = `你是一位專業的英語教師，專門幫助母語為
 - 3-4：意思部分正確，有較多語法錯誤
 - 1-2：意思偏差或嚴重語法錯誤
 
-contextVersions 的三個版本必須真正體現不同風格，不能只改一兩個詞。`
+contextVersions 陣列中每個情景的版本必須真正體現不同風格，不能只改一兩個詞。`
+}
 
 function buildUserMessage(chineseText: string, userTranslation: string, context: string): string {
   return `情景：${context}
@@ -52,29 +55,23 @@ function validateFeedback(obj: unknown): FeedbackResult {
     typeof f.problem !== 'string' ||
     typeof f.betterVersion !== 'string' ||
     typeof f.grammarTip !== 'string' ||
-    typeof f.contextVersions !== 'object' ||
-    f.contextVersions === null
+    !Array.isArray(f.contextVersions)
   ) {
     throw new Error('回應格式不正確')
   }
-  const cv = f.contextVersions as Record<string, unknown>
-  if (
-    typeof cv.formal !== 'string' ||
-    typeof cv.casual !== 'string' ||
-    typeof cv.written !== 'string'
-  ) {
-    throw new Error('情景版本格式不正確')
-  }
+  const contextVersions = (f.contextVersions as unknown[]).map((item) => {
+    const cv = item as Record<string, unknown>
+    if (typeof cv.name !== 'string' || typeof cv.text !== 'string') {
+      throw new Error('情景版本格式不正確')
+    }
+    return { name: cv.name, text: cv.text }
+  })
   return {
     score: f.score,
     verdict: f.verdict,
     problem: f.problem,
     betterVersion: f.betterVersion,
-    contextVersions: {
-      formal: cv.formal,
-      casual: cv.casual,
-      written: cv.written
-    },
+    contextVersions,
     grammarTip: f.grammarTip
   }
 }
@@ -83,13 +80,14 @@ async function callClaude(
   chineseText: string,
   userTranslation: string,
   context: string,
-  apiKey: string
+  apiKey: string,
+  topContexts: string[]
 ): Promise<FeedbackResult> {
   const client = new Anthropic({ apiKey })
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
-    system: SYSTEM_PROMPT,
+    system: buildSystemPrompt(topContexts),
     messages: [{ role: 'user', content: buildUserMessage(chineseText, userTranslation, context) }]
   })
   const textBlock = response.content.find((b) => b.type === 'text')
@@ -104,14 +102,15 @@ async function callOpenAI(
   chineseText: string,
   userTranslation: string,
   context: string,
-  apiKey: string
+  apiKey: string,
+  topContexts: string[]
 ): Promise<FeedbackResult> {
   const client = new OpenAI({ apiKey })
   const response = await client.chat.completions.create({
     model: 'gpt-4o-mini',
     response_format: { type: 'json_object' },
     messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: buildSystemPrompt(topContexts) },
       { role: 'user', content: buildUserMessage(chineseText, userTranslation, context) }
     ]
   })
@@ -125,12 +124,13 @@ export async function callLLM(
   chineseText: string,
   userTranslation: string,
   context: string,
-  config: AppConfig
+  config: AppConfig,
+  topContexts: string[]
 ): Promise<FeedbackResult> {
   if (!config.apiKey) throw new Error('尚未設定 API Key')
   if (config.selectedProvider === 'claude') {
-    return callClaude(chineseText, userTranslation, context, config.apiKey)
+    return callClaude(chineseText, userTranslation, context, config.apiKey, topContexts)
   } else {
-    return callOpenAI(chineseText, userTranslation, context, config.apiKey)
+    return callOpenAI(chineseText, userTranslation, context, config.apiKey, topContexts)
   }
 }

@@ -1,6 +1,6 @@
 import { ipcMain, app } from 'electron'
 import { getConfig, setConfig } from './config-store'
-import { getContexts, addContext, deleteContext } from './context-store'
+import { getContexts, addContext, deleteContext, incrementContextUsage, getTopContexts, getContextUsage } from './context-store'
 import { getRecords, addRecord } from './records-store'
 import { callLLM } from './llm-service'
 import type { TranslatePayload } from '../shared/types'
@@ -29,6 +29,10 @@ export function registerIpcHandlers(): void {
     return addContext(name)
   })
 
+  ipcMain.handle('contexts:get-usage', () => {
+    return getContextUsage()
+  })
+
   ipcMain.handle('contexts:delete', (_event, { id }: { id: string }) => {
     try {
       deleteContext(id)
@@ -44,6 +48,7 @@ export function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('records:add', (_event, data) => {
+    if (data.context) incrementContextUsage(data.context)
     return addRecord(data)
   })
 
@@ -56,11 +61,13 @@ export function registerIpcHandlers(): void {
   ipcMain.handle('llm:translate', async (_event, payload: TranslatePayload) => {
     try {
       const config = getConfig()
+      const topContexts = getTopContexts(3)
       const feedback = await callLLM(
         payload.chineseText,
         payload.userTranslation,
         payload.context,
-        config
+        config,
+        topContexts
       )
       return feedback
     } catch (e) {

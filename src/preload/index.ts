@@ -9,6 +9,7 @@ const api = {
 
   // Contexts
   getContexts: (): Promise<Context[]> => ipcRenderer.invoke('contexts:get'),
+  getContextUsage: (): Promise<Record<string, number>> => ipcRenderer.invoke('contexts:get-usage'),
   addContext: (name: string): Promise<Context> => ipcRenderer.invoke('contexts:add', { name }),
   deleteContext: (id: string): Promise<{ success: boolean }> =>
     ipcRenderer.invoke('contexts:delete', { id }),

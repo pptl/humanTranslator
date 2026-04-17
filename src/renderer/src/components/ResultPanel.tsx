@@ -57,9 +57,9 @@ export function ResultPanel({ feedback }: ResultPanelProps) {
       {/* Context versions */}
       <Section title="不同情景版本">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <ContextItem tag="正式" text={feedback.contextVersions.formal} />
-          <ContextItem tag="朋友" text={feedback.contextVersions.casual} />
-          <ContextItem tag="書面" text={feedback.contextVersions.written} />
+          {feedback.contextVersions.map((cv) => (
+            <ContextItem key={cv.name} tag={cv.name} text={cv.text} />
+          ))}
         </div>
       </Section>
 

@@ -14,11 +14,7 @@ export interface FeedbackResult {
   verdict: string
   problem: string
   betterVersion: string
-  contextVersions: {
-    formal: string
-    casual: string
-    written: string
-  }
+  contextVersions: Array<{ name: string; text: string }>
   grammarTip: string
 }
 
