@@ -7,7 +7,27 @@
     "start": "node scripts/start.js",
     "dev": "node scripts/dev.js",
     "build": "electron-vite build",
+    "package": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win",
     "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.humantranslator.app",
+    "productName": "人類翻譯機",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "resources/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    }
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
