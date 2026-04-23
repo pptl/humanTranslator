@@ -27,13 +27,14 @@ export default function App() {
     setIsExpanded(result.isExpanded)
   }
 
-  if (!isExpanded) {
-    return (
+  return (
+    <>
+      {/* FAB — always mounted, shown only when collapsed */}
       <div
         style={{
+          display: isExpanded ? 'none' : 'flex',
           width: '100vw',
           height: '100vh',
-          display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           background: 'transparent'
@@ -41,117 +42,118 @@ export default function App() {
       >
         <FAB isExpanded={false} onClick={handleFABClick} />
       </div>
-    )
-  }
 
-  function renderContent() {
-    if (activeView === 'main') return <MainPanel />
-    if (activeView === 'review') return <ReviewPanel />
-    return <SettingsPanel />
-  }
-
-  return (
-    <div
-      style={{
-        width: '100vw',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'transparent'
-      }}
-    >
+      {/* Expanded panel — always mounted, hidden when collapsed */}
       <div
         style={{
-          background: 'var(--color-white)',
-          borderRadius: 'var(--border-radius)',
-          boxShadow: 'var(--shadow)',
-          border: '1px solid var(--color-light-border)',
-          overflow: 'hidden',
-          display: 'flex',
+          display: isExpanded ? 'flex' : 'none',
+          width: '100vw',
+          height: '100vh',
           flexDirection: 'column',
-          maxHeight: '100vh'
+          background: 'transparent'
         }}
       >
-        {/* Title row — drag region */}
         <div
           style={{
+            background: 'var(--color-white)',
+            borderRadius: 'var(--border-radius)',
+            boxShadow: 'var(--shadow)',
+            border: '1px solid var(--color-light-border)',
+            overflow: 'hidden',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '10px 14px 8px',
-            WebkitAppRegion: 'drag',
-            flexShrink: 0
+            flexDirection: 'column',
+            maxHeight: '100vh'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-            <span
-              style={{
-                color: 'var(--color-primary)',
-                fontSize: '9px',
-                lineHeight: 1,
-                WebkitAppRegion: 'no-drag'
-              }}
-            >
-              ●
-            </span>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text)' }}>
-              人類翻譯機
-            </span>
-          </div>
-          <button
-            onClick={handleFABClick}
+          {/* Title row — drag region */}
+          <div
             style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--color-text-muted)',
-              cursor: 'pointer',
-              fontSize: '18px',
-              lineHeight: 1,
-              padding: '2px 4px',
-              WebkitAppRegion: 'no-drag',
-              borderRadius: '4px'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 14px 8px',
+              WebkitAppRegion: 'drag',
+              flexShrink: 0
             }}
-            title="收起"
           >
-            ×
-          </button>
-        </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              <span
+                style={{
+                  color: 'var(--color-primary)',
+                  fontSize: '9px',
+                  lineHeight: 1,
+                  WebkitAppRegion: 'no-drag'
+                }}
+              >
+                ●
+              </span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text)' }}>
+                人類翻譯機
+              </span>
+            </div>
+            <button
+              onClick={handleFABClick}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-text-muted)',
+                cursor: 'pointer',
+                fontSize: '18px',
+                lineHeight: 1,
+                padding: '2px 4px',
+                WebkitAppRegion: 'no-drag',
+                borderRadius: '4px'
+              }}
+              title="收起"
+            >
+              ×
+            </button>
+          </div>
 
-        {/* Tabs row */}
-        <div
-          style={{
-            display: 'flex',
-            padding: '0 12px',
-            borderBottom: '2px solid var(--color-light-border)',
-            WebkitAppRegion: 'no-drag',
-            flexShrink: 0
-          }}
-        >
-          <TabButton
-            label="練習"
-            active={activeView === 'main'}
-            onClick={() => setActiveView('main')}
-          />
-          <TabButton
-            label="復習"
-            active={activeView === 'review'}
-            onClick={() => setActiveView('review')}
-          />
-          <TabButton
-            label="設定"
-            active={activeView === 'settings'}
-            onClick={() => setActiveView('settings')}
-          />
-        </div>
+          {/* Tabs row */}
+          <div
+            style={{
+              display: 'flex',
+              padding: '0 12px',
+              borderBottom: '2px solid var(--color-light-border)',
+              WebkitAppRegion: 'no-drag',
+              flexShrink: 0
+            }}
+          >
+            <TabButton
+              label="練習"
+              active={activeView === 'main'}
+              onClick={() => setActiveView('main')}
+            />
+            <TabButton
+              label="復習"
+              active={activeView === 'review'}
+              onClick={() => setActiveView('review')}
+            />
+            <TabButton
+              label="設定"
+              active={activeView === 'settings'}
+              onClick={() => setActiveView('settings')}
+            />
+          </div>
 
-        {/* Content */}
-        <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
-          <ContextsProvider>
-            {renderContent()}
-          </ContextsProvider>
+          {/* Content — all panels always mounted, toggled by display */}
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            <ContextsProvider>
+              <div style={{ display: activeView === 'main' ? 'block' : 'none', padding: '12px' }}>
+                <MainPanel />
+              </div>
+              <div style={{ display: activeView === 'review' ? 'block' : 'none', padding: '12px' }}>
+                <ReviewPanel />
+              </div>
+              <div style={{ display: activeView === 'settings' ? 'block' : 'none', padding: '12px' }}>
+                <SettingsPanel />
+              </div>
+            </ContextsProvider>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

@@ -107,7 +107,7 @@ async function callOpenAI(
 ): Promise<FeedbackResult> {
   const client = new OpenAI({ apiKey })
   const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4.1',
     response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: buildSystemPrompt(topContexts) },
@@ -162,7 +162,7 @@ async function callClaudeFollowUp(payload: FollowUpPayload, apiKey: string): Pro
 async function callOpenAIFollowUp(payload: FollowUpPayload, apiKey: string): Promise<string> {
   const client = new OpenAI({ apiKey })
   const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4.1',
     max_tokens: 512,
     messages: [
       { role: 'system', content: buildFollowUpSystemPrompt(payload) },

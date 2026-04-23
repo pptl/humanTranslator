@@ -133,20 +133,7 @@ export function MainPanel() {
                 handleContextInputChange('')
                 setSelectedContextId('')
               }}
-              style={{
-                position: 'absolute',
-                right: '6px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '2px',
-                color: 'var(--color-light-border)',
-                fontSize: '14px',
-                lineHeight: 1,
-                WebkitAppRegion: 'no-drag'
-              }}
+              style={{ ...clearBtnStyle, top: '50%', transform: 'translateY(-50%)' }}
               tabIndex={-1}
             >
               ✕
@@ -206,33 +193,65 @@ export function MainPanel() {
       {/* Chinese text */}
       <div>
         <label style={labelStyle}>原文（中文）</label>
-        <textarea
-          placeholder="輸入你想練習翻譯的中文句子..."
-          value={chineseText}
-          onChange={(e) => {
-            setChineseText(e.target.value)
-            autoResize(e.target)
-          }}
-          rows={1}
-          style={{ ...textareaStyle, overflow: 'hidden' }}
-          disabled={isLoading}
-        />
+        <div style={{ position: 'relative' }}>
+          <textarea
+            placeholder="輸入你想練習翻譯的中文句子..."
+            value={chineseText}
+            onChange={(e) => {
+              setChineseText(e.target.value)
+              autoResize(e.target)
+            }}
+            rows={1}
+            style={{ ...textareaStyle, overflow: 'hidden', paddingRight: chineseText ? '28px' : '10px' }}
+            disabled={isLoading}
+          />
+          {chineseText && !isLoading && (
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault()
+                setChineseText('')
+                const ta = e.currentTarget.previousElementSibling as HTMLTextAreaElement
+                if (ta) { ta.style.height = 'auto' }
+              }}
+              style={clearBtnStyle}
+              tabIndex={-1}
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {/* English translation */}
       <div>
         <label style={labelStyle}>我的翻譯（英文）</label>
-        <textarea
-          placeholder="輸入你的翻譯..."
-          value={userTranslation}
-          onChange={(e) => {
-            setUserTranslation(e.target.value)
-            autoResize(e.target)
-          }}
-          rows={1}
-          style={{ ...textareaStyle, overflow: 'hidden' }}
-          disabled={isLoading}
-        />
+        <div style={{ position: 'relative' }}>
+          <textarea
+            placeholder="輸入你的翻譯..."
+            value={userTranslation}
+            onChange={(e) => {
+              setUserTranslation(e.target.value)
+              autoResize(e.target)
+            }}
+            rows={1}
+            style={{ ...textareaStyle, overflow: 'hidden', paddingRight: userTranslation ? '28px' : '10px' }}
+            disabled={isLoading}
+          />
+          {userTranslation && !isLoading && (
+            <button
+              onMouseDown={(e) => {
+                e.preventDefault()
+                setUserTranslation('')
+                const ta = e.currentTarget.previousElementSibling as HTMLTextAreaElement
+                if (ta) { ta.style.height = 'auto' }
+              }}
+              style={clearBtnStyle}
+              tabIndex={-1}
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Submit button */}
@@ -340,6 +359,20 @@ const dropdownStyle: React.CSSProperties = {
   boxShadow: '0 4px 12px rgba(83, 74, 183, 0.15)',
   zIndex: 100,
   overflow: 'hidden'
+}
+
+const clearBtnStyle: React.CSSProperties = {
+  position: 'absolute',
+  right: '6px',
+  top: '8px',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: '2px',
+  color: 'var(--color-light-border)',
+  fontSize: '14px',
+  lineHeight: 1,
+  WebkitAppRegion: 'no-drag'
 }
 
 const dropdownItemStyle: React.CSSProperties = {
