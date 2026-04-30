@@ -4,7 +4,9 @@
 
 ## 步驟 1 — 收集變更資訊
 
-用 Bash 工具**平行**執行以下指令（全部在專案目錄 `c:/Users/Alen Chua/Desktop/project/humanTranslator` 下）：
+先用 Bash 執行 `pwd` 取得目前專案目錄路徑，之後所有指令皆在該目錄下執行。
+
+用 Bash 工具**平行**執行以下指令：
 
 - `git status` — 取得所有未提交的變更
 - `git diff HEAD` — 取得完整 diff（含已 staged 與未 staged）
@@ -39,7 +41,18 @@
 
 ## 步驟 3 — 詢問確認
 
-顯示完整摘要後，問用戶：
+顯示完整摘要前，先用 Bash 執行以下指令取得目前 git 帳號資訊：
+
+- `git config user.name` — 取得使用者名稱
+- `git config user.email` — 取得使用者 Email
+
+在摘要最後顯示：
+
+```
+👤 目前 Git 帳號：<user.name> (<user.email>)
+```
+
+然後問用戶：
 
 > 「以上是本次的變更摘要。確認要 commit 並 push 嗎？可直接回覆「確認」，或告訴我要修改 commit 訊息。」
 
